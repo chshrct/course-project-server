@@ -23,6 +23,7 @@
         "endOfLine": "auto"
       }
     ],
+    "no-underscore-dangle": "off",
     "import/order": [
       "error",
       {
