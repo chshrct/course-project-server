@@ -48,7 +48,7 @@ export default {
 
     await UserModel.updateMany({ _id: { $in: userIds } }, { $set: { status } });
 
-    res.status(STATUS_CODES.OK).end();
+    res.send({ status });
   },
   updateUsersAccess: async (
     req: Request<{}, {}, UpdateUsersAccessRequestBodyType>,
@@ -58,7 +58,7 @@ export default {
 
     await UserModel.updateMany({ _id: { $in: userIds } }, { $set: { access } });
 
-    res.status(STATUS_CODES.OK).end();
+    res.send({ access });
   },
   deleteUsers: async (
     req: Request<{}, {}, DeleteUsersRequestBodyType>,

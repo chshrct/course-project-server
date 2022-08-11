@@ -17,16 +17,23 @@ import {
 } from './types';
 
 export default {
-  check: (
+  check: async (
     req: Request<{}, {}, AuthMiddlewareBodyType>,
     res: Response<AuthCheckResponseBodyType>,
+    next: NextFunction,
   ) => {
-    const { _id, access, name } = req.body.tokenPayload;
+    const { _id } = req.body.tokenPayload;
+
+    const userExists = await UserModel.findOne({ _id });
+
+    if (!userExists) {
+      return next(new ErrorException(ErrorCode.Unauthenticated));
+    }
 
     res.send({
       id: _id,
-      name,
-      access,
+      name: userExists.name,
+      access: userExists.access,
     });
   },
   signUp: async (

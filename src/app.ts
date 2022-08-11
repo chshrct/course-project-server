@@ -12,13 +12,13 @@ config();
 const DEFAULT_PORT = 3000;
 const app: Application = express();
 
+app.use(cors({ origin: process.env.BASE_CLIENT_URL }));
 app.use(
   urlencoded({
     extended: true,
   }),
 );
 app.use(json());
-app.use(cors({ origin: process.env.BASE_CLIENT_URL }));
 
 connect();
 
