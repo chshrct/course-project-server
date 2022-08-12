@@ -16,6 +16,7 @@ export class ErrorException extends Error {
     switch (code) {
       case ErrorCode.Unauthenticated:
       case ErrorCode.Blocked:
+      case ErrorCode.NotAllowed:
         this.status = STATUS_CODES.UNAUTHORIZED;
         break;
       case ErrorCode.MaximumAllowedGrade:

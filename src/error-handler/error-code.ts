@@ -5,6 +5,8 @@ export class ErrorCode {
 
   public static readonly DuplicateEmailError = 'Email allready taken';
 
+  public static readonly NotAllowed = 'You are not allowed to access this resource';
+
   public static readonly NotFound = 'NotFound';
 
   public static readonly MaximumAllowedGrade = 'MaximumAllowedGrade';

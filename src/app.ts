@@ -26,14 +26,14 @@ app.get('/', (req: Request, res: Response) => {
   res.send('Course project server');
 });
 
-app.get('/auth/check', authMiddleware, AUTH.check);
+app.get('/auth/check', authMiddleware(), AUTH.check);
 app.post('/auth/sign-up', AUTH.signUp);
 app.post('/auth/sign-in', AUTH.signIn);
 
-app.get('/user', authMiddleware, USERS.getAllUsers);
-app.post('/user/status', authMiddleware, USERS.updateUsersStatus);
-app.post('/user/access', authMiddleware, USERS.updateUsersAccess);
-app.delete('/user', authMiddleware, USERS.deleteUsers);
+app.get('/user', authMiddleware(true), USERS.getAllUsers);
+app.delete('/user', authMiddleware(true), USERS.deleteUsers);
+app.post('/user/status', authMiddleware(true), USERS.updateUsersStatus);
+app.post('/user/access', authMiddleware(true), USERS.updateUsersAccess);
 
 app.use(errorHandler);
 
