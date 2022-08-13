@@ -32,8 +32,7 @@ app.post('/auth/sign-in', AUTH.signIn);
 
 app.get('/user', authMiddleware(true), USERS.getAllUsers);
 app.delete('/user', authMiddleware(true), USERS.deleteUsers);
-app.post('/user/status', authMiddleware(true), USERS.updateUsersStatus);
-app.post('/user/access', authMiddleware(true), USERS.updateUsersAccess);
+app.put('/user', authMiddleware(true), USERS.updateUsers);
 
 app.use(errorHandler);
 

@@ -8,8 +8,8 @@ import {
   DeleteUsersRequestBodyType,
   GetAllUsersRequestQueryType,
   GetAllUsersResponseBodyType,
-  UpdateUsersAccessRequestBodyType,
-  UpdateUsersStatusRequestBodyType,
+  UpdateUsersRequestBodyType,
+  UpdateUsersResponseBodyType,
 } from './types';
 
 const DEFAULT_USERS_PAGE_LIMIT = 10;
@@ -40,25 +40,24 @@ export default {
 
     res.send({ users: mappedUsers, count });
   },
-  updateUsersStatus: async (
-    req: Request<{}, {}, UpdateUsersStatusRequestBodyType>,
-    res: Response,
+  updateUsers: async (
+    req: Request<{}, {}, UpdateUsersRequestBodyType>,
+    res: Response<UpdateUsersResponseBodyType>,
   ) => {
-    const { userIds, status } = req.body;
+    const { userIds, update } = req.body;
 
-    await UserModel.updateMany({ _id: { $in: userIds } }, { $set: { status } });
+    await UserModel.updateMany({ _id: { $in: userIds } }, { $set: update });
+    const changedUsers = await UserModel.find({ _id: { $in: userIds } });
 
-    res.send({ status });
-  },
-  updateUsersAccess: async (
-    req: Request<{}, {}, UpdateUsersAccessRequestBodyType>,
-    res: Response,
-  ) => {
-    const { userIds, access } = req.body;
+    const users = changedUsers.map(({ _id: id, name, email, status, access }) => ({
+      id,
+      name,
+      email,
+      status,
+      access,
+    }));
 
-    await UserModel.updateMany({ _id: { $in: userIds } }, { $set: { access } });
-
-    res.send({ access });
+    res.send({ users });
   },
   deleteUsers: async (
     req: Request<{}, {}, DeleteUsersRequestBodyType>,

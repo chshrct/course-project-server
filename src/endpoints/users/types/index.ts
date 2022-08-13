@@ -18,14 +18,16 @@ export type GetAllUsersResponseBodyType = {
   count: number;
 };
 
-export type UpdateUsersStatusRequestBodyType = GetAllUsersRequestQueryType & {
+export type UpdateUsersRequestBodyType = {
+  pageInfo: GetAllUsersRequestQueryType;
   userIds: string[];
-  status: UserStatusType;
+  update: { access: UserAccessType; status: UserStatusType };
 };
-export type UpdateUsersAccessRequestBodyType = GetAllUsersRequestQueryType & {
-  userIds: string[];
-  access: UserAccessType;
+
+export type UpdateUsersResponseBodyType = {
+  users: UserType[];
 };
+
 export type DeleteUsersRequestBodyType = GetAllUsersRequestQueryType & {
   userIds: string[];
 };
