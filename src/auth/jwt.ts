@@ -10,8 +10,8 @@ const jwtKey = 'gamarjoba';
 
 export const generateAuthToken = (user: IUser): string => {
   const { _id, name, access } = user;
-  const token = jwt.sign({ _id, name, access }, jwtKey, {
-    expiresIn: '2h',
+  const token = jwt.sign({ _id: _id.toString(), name, access }, jwtKey, {
+    expiresIn: '7d',
   });
 
   return token;

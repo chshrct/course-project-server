@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import mongoose from 'mongoose';
 
 import { ErrorCode } from '../error-handler/error-code';
 import { ErrorException } from '../error-handler/error-exception';
@@ -19,7 +20,9 @@ export const authMiddleware = (withAccessControl: boolean = false) => {
         const tokenPayload = verifyToken(token);
         const { _id } = tokenPayload;
 
-        const userExists = await UserModel.findOne({ _id });
+        const userExists = await UserModel.findOne({
+          _id: new mongoose.Types.ObjectId(_id),
+        });
 
         if (!userExists) {
           return next(new ErrorException(ErrorCode.Unauthenticated));

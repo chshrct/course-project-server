@@ -13,6 +13,6 @@ const ITegSchema = new Schema<ITeg>(
   { collection: 'tegs', timestamps: true },
 );
 
-const TegModel: Model<ITeg> = model('teg', ITegSchema);
+const TegModel: Model<ITeg> = model('Teg', ITegSchema);
 
 export default TegModel;

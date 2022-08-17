@@ -4,7 +4,8 @@ import express, { Application, Request, Response, urlencoded, json } from 'expre
 
 import { authMiddleware } from './auth/auth.middleware';
 import AUTH from './endpoints/auth';
-import USERS from './endpoints/users';
+import COLLECTION from './endpoints/collection';
+import USER from './endpoints/user';
 import { errorHandler } from './error-handler/error-handler';
 import { connect } from './models/db/mongoose-connection';
 
@@ -30,9 +31,16 @@ app.get('/auth/check', authMiddleware(), AUTH.check);
 app.post('/auth/sign-up', AUTH.signUp);
 app.post('/auth/sign-in', AUTH.signIn);
 
-app.get('/user', authMiddleware(true), USERS.getAllUsers);
-app.delete('/user', authMiddleware(true), USERS.deleteUsers);
-app.put('/user', authMiddleware(true), USERS.updateUsers);
+app.get('/users', authMiddleware(true), USER.getUsers);
+app.get('/users/:id', USER.getUserName);
+app.delete('/users', authMiddleware(true), USER.deleteUsers);
+app.put('/users', authMiddleware(true), USER.updateUsers);
+
+app.post('/collections', authMiddleware(), COLLECTION.createCollection);
+app.get('/collections/:id', COLLECTION.getUserCollections);
+app.patch('/collections/:id', authMiddleware(), COLLECTION.updateCollection);
+app.delete('/collections/:id', authMiddleware(), COLLECTION.deleteCollection);
+app.get('/topics', authMiddleware(), COLLECTION.getTopics);
 
 app.use(errorHandler);
 

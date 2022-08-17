@@ -21,6 +21,9 @@ export class ErrorException extends Error {
         break;
       case ErrorCode.MaximumAllowedGrade:
       case ErrorCode.DuplicateEmailError:
+      case ErrorCode.DuplicateUserNameError:
+      case ErrorCode.DuplicateCollectionTitleError:
+      case ErrorCode.OwnerNotFound:
         this.status = STATUS_CODES.BAD_REQUEST;
         break;
       case ErrorCode.AsyncError:

@@ -1,9 +1,9 @@
-import { model, Model, Schema } from 'mongoose';
+import mongoose, { model, Model, Schema } from 'mongoose';
 
 import { UserAccessType, UserStatusType } from './types';
 
 export interface IUser {
-  _id: string;
+  _id: mongoose.Types.ObjectId;
   email: string;
   password: string;
   name: string;
@@ -13,22 +13,21 @@ export interface IUser {
 
 const IUserSchema = new Schema<IUser>(
   {
-    _id: { type: String, required: true },
+    _id: mongoose.Types.ObjectId,
     email: {
       type: String,
       required: true,
       lowercase: true,
-      index: true,
       unique: true,
     },
     password: { type: String, required: true },
-    name: { type: String, required: true },
+    name: { type: String, required: true, unique: true },
     access: { type: String, required: true },
     status: { type: String, required: true },
   },
   { collection: 'users', timestamps: true },
 );
 
-const UserModel: Model<IUser> = model('user', IUserSchema);
+const UserModel: Model<IUser> = model('User', IUserSchema);
 
 export default UserModel;

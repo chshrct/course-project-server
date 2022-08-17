@@ -13,6 +13,6 @@ const ITopicSchema = new Schema<ITopic>(
   { collection: 'topics', timestamps: true },
 );
 
-const TopicModel: Model<ITopic> = model('topic', ITopicSchema);
+const TopicModel: Model<ITopic> = model('Topic', ITopicSchema);
 
 export default TopicModel;

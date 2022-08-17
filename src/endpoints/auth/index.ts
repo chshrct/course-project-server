@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { ulid } from 'ulid';
+import mongoose from 'mongoose';
 
 import { generateAuthToken } from '../../auth/jwt';
 import { comparePassword, passwordHash } from '../../auth/password-hash';
@@ -42,15 +42,20 @@ export default {
     next: NextFunction,
   ) => {
     const { email, name, password } = req.body;
-    const userExists = await UserModel.findOne({ email });
+    const userWithEmailExists = await UserModel.findOne({ email });
 
-    if (userExists) {
+    if (userWithEmailExists) {
       return next(new ErrorException(ErrorCode.DuplicateEmailError, { email }));
+    }
+    const userWithNameExists = await UserModel.findOne({ name });
+
+    if (userWithNameExists) {
+      return next(new ErrorException(ErrorCode.DuplicateUserNameError, { name }));
     }
 
     const hashedPassword = passwordHash(password);
     const newUser: IUser = {
-      _id: ulid(),
+      _id: new mongoose.Types.ObjectId(),
       email,
       name,
       password: hashedPassword,
@@ -87,7 +92,7 @@ export default {
     const token = generateAuthToken(userExists);
 
     res.send({
-      id: userExists._id,
+      id: userExists._id.toString(),
       name: userExists.name,
       access: userExists.access,
       token,
