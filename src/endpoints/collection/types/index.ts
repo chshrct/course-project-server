@@ -1,6 +1,6 @@
 import { FieldType } from '../../../models/db/collection.db';
 
-export type CollectionType = {
+export type CollectionRequestType = {
   id: string;
   title: string;
   description: string;
@@ -9,8 +9,7 @@ export type CollectionType = {
   topics: string[];
   itemFields: FieldType[];
 };
-
-export type GetUserCollectionsResponseType = {
+export type CollectionResponseType = {
   id: string;
   title: string;
   description: string;
@@ -18,9 +17,11 @@ export type GetUserCollectionsResponseType = {
   owner: { id: string; name: string };
   topics: string[];
   itemFields: FieldType[];
-}[];
+};
 
-export type CreateCollectionRequestType = Omit<CollectionType, 'id'>;
+export type GetUserCollectionsResponseType = CollectionResponseType[];
+
+export type CreateCollectionRequestType = Omit<CollectionRequestType, 'id'>;
 
 export type CreateCollectionResponseType = {
   id: string;

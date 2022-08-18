@@ -9,6 +9,7 @@ import UserModel, { IUser } from '../../models/db/user.db';
 import { STATUS_CODES } from '../../types/status';
 
 import {
+  CollectionResponseType,
   CreateCollectionRequestType,
   CreateCollectionResponseType,
   DeleteCollectionRequestType,
@@ -19,6 +20,43 @@ import {
 } from './types';
 
 export default {
+  getCollection: async (
+    req: Request<{ id: string }>,
+    res: Response<CollectionResponseType>,
+    next: NextFunction,
+  ) => {
+    try {
+      const { id } = req.params;
+      const userCollectionExists = await CollectionModel.findOne({
+        _id: id,
+      })
+        .populate<{
+          topics: ITopic[];
+        }>('topics')
+        .populate<{
+          owner: IUser;
+        }>('owner');
+
+      if (!userCollectionExists) return next(new ErrorException(ErrorCode.NotFound));
+
+      const { _id, title, description, image, owner, topics, itemFields } =
+        userCollectionExists;
+
+      const collection = {
+        id: _id.toString(),
+        title,
+        description,
+        image: image || null,
+        owner: { id: owner._id.toString(), name: owner.name },
+        topics: topics.map(topic => topic.title),
+        itemFields,
+      };
+
+      res.send(collection);
+    } catch (e) {
+      return next(new ErrorException(ErrorCode.UnknownError, { e }));
+    }
+  },
   getUserCollections: async (
     req: Request<{ id: string }>,
     res: Response<GetUserCollectionsResponseType>,

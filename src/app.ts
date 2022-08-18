@@ -36,10 +36,11 @@ app.get('/users/:id', USER.getUserName);
 app.delete('/users', authMiddleware(true), USER.deleteUsers);
 app.put('/users', authMiddleware(true), USER.updateUsers);
 
+app.get('/collections/:id', authMiddleware(), COLLECTION.getCollection);
 app.post('/collections', authMiddleware(), COLLECTION.createCollection);
-app.get('/collections/:id', COLLECTION.getUserCollections);
 app.patch('/collections/:id', authMiddleware(), COLLECTION.updateCollection);
 app.delete('/collections/:id', authMiddleware(), COLLECTION.deleteCollection);
+app.get('/collections/user/:id', COLLECTION.getUserCollections);
 app.get('/topics', authMiddleware(), COLLECTION.getTopics);
 
 app.use(errorHandler);
