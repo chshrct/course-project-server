@@ -5,6 +5,8 @@ import express, { Application, Request, Response, urlencoded, json } from 'expre
 import { authMiddleware } from './auth/auth.middleware';
 import AUTH from './endpoints/auth';
 import COLLECTION from './endpoints/collection';
+import ITEM from './endpoints/item';
+import TAGS from './endpoints/tags';
 import USER from './endpoints/user';
 import { errorHandler } from './error-handler/error-handler';
 import { connect } from './models/db/mongoose-connection';
@@ -41,7 +43,16 @@ app.post('/collections', authMiddleware(), COLLECTION.createCollection);
 app.patch('/collections/:id', authMiddleware(), COLLECTION.updateCollection);
 app.delete('/collections/:id', authMiddleware(), COLLECTION.deleteCollection);
 app.get('/collections/user/:id', COLLECTION.getUserCollections);
+
 app.get('/topics', authMiddleware(), COLLECTION.getTopics);
+
+app.get('/tags', authMiddleware(), TAGS.getTags);
+
+app.get('/items/:id', authMiddleware(), ITEM.getItem);
+app.post('/items', authMiddleware(), ITEM.createItem);
+app.patch('/items/:id', authMiddleware(), ITEM.updateItem);
+app.delete('/items', authMiddleware(), ITEM.deleteItems);
+app.get('/items/collection/:id', authMiddleware(), ITEM.getCollectionItems);
 
 app.use(errorHandler);
 

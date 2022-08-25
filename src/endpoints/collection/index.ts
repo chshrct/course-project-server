@@ -49,7 +49,7 @@ export default {
         image: image || null,
         owner: { id: owner._id.toString(), name: owner.name },
         topics: topics.map(topic => topic.title),
-        itemFields,
+        itemFields: itemFields.map(({ title, type }) => ({ title, type })),
       };
 
       res.send(collection);
@@ -73,6 +73,7 @@ export default {
         .populate<{
           owner: IUser;
         }>('owner');
+
       const userCollections = userCollectionsDb.map(
         ({ _id, title, description, image, owner, topics, itemFields }) => ({
           id: _id.toString(),
@@ -112,6 +113,7 @@ export default {
       }
 
       const topicsDb = await TopicModel.find({ title: { $in: topics } });
+
       const topicsDbObjectIds = topicsDb.map(
         topic => new mongoose.Types.ObjectId(topic._id),
       );
@@ -141,7 +143,7 @@ export default {
       if (!createdCollectionExists)
         return next(new ErrorException(ErrorCode.UnknownError));
 
-      const createdCollection = {
+      const createdCollection: CreateCollectionResponseType = {
         id: createdCollectionExists._id.toString(),
         title: createdCollectionExists.title,
         description: createdCollectionExists.description,

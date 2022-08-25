@@ -14,7 +14,7 @@ import {
   UpdateUsersResponseBodyType,
 } from './types';
 
-const DEFAULT_USERS_PAGE_LIMIT = 10;
+const DEFAULT_PAGE_LIMIT = 5;
 
 export default {
   getUsers: async (
@@ -23,7 +23,7 @@ export default {
     next: NextFunction,
   ) => {
     try {
-      let { page = 1, limit = DEFAULT_USERS_PAGE_LIMIT } = req.query;
+      let { page = 1, limit = DEFAULT_PAGE_LIMIT } = req.query;
 
       page = Number(page);
       limit = Number(limit);
