@@ -1,19 +1,37 @@
+import http from 'http';
+
 import cors from 'cors';
 import { config } from 'dotenv';
 import express, { Application, Request, Response, urlencoded, json } from 'express';
+import { ChangeStreamInsertDocument } from 'mongodb';
+import { Server } from 'socket.io';
 
 import { authMiddleware } from './auth/auth.middleware';
 import AUTH from './endpoints/auth';
 import COLLECTION from './endpoints/collection';
+import COMMENT from './endpoints/comment';
+import { CommentResponseType } from './endpoints/comment/types';
 import ITEM from './endpoints/item';
 import TAGS from './endpoints/tags';
 import USER from './endpoints/user';
 import { errorHandler } from './error-handler/error-handler';
+import CommentModel, { IComment } from './models/db/comment.db';
 import { connect } from './models/db/mongoose-connection';
+import UserModel from './models/db/user.db';
 
 config();
+
 const DEFAULT_PORT = 3000;
+
 const app: Application = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  path: '/socket',
+  cors: {
+    origin: process.env.BASE_CLIENT_URL,
+    methods: ['GET', 'POST'],
+  },
+});
 
 app.use(cors({ origin: process.env.BASE_CLIENT_URL }));
 app.use(
@@ -54,10 +72,46 @@ app.patch('/items/:id', authMiddleware(), ITEM.updateItem);
 app.delete('/items', authMiddleware(), ITEM.deleteItems);
 app.get('/items/collection/:id', authMiddleware(), ITEM.getCollectionItems);
 
+app.get('/comments/:id', COMMENT.getComments);
+app.post('/comments', authMiddleware(), COMMENT.createComment);
+
 app.use(errorHandler);
+
+io.on('connection', socket => {
+  socket.on('itemId', (itemId: string) => {
+    const commentsChangeStream = CommentModel.watch();
+
+    commentsChangeStream.on(
+      'change',
+      async (data: ChangeStreamInsertDocument<IComment>) => {
+        try {
+          const { item, _id, createdAt, message, user } = data.fullDocument;
+          const userDb = await UserModel.findById(user._id.toString());
+
+          if (!userDb) return;
+          const userRes = { id: userDb._id.toString(), name: userDb.name };
+
+          if (itemId === item.toString()) {
+            const comment: CommentResponseType = {
+              id: _id.toString(),
+              date: createdAt!.toString(),
+              item: item.toString(),
+              message,
+              user: userRes,
+            };
+
+            io.to(socket.id).emit('newComment', comment);
+          }
+        } catch (e) {
+          console.log(e);
+        }
+      },
+    );
+  });
+});
 
 const PORT = process.env.PORT || DEFAULT_PORT;
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server is listening on port ${PORT}`);
 });
