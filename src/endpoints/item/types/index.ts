@@ -32,3 +32,9 @@ export type GetCollectionItemsRequestQueryType = {
 export type DeleteItemsRequestType = {
   itemIds: string[];
 };
+
+export type GetTenLatestResponse = {
+  item: { id: string; title: string };
+  collection: { id: string; title: string; image: string | null };
+  owner: { id: string; title: string };
+}[];

@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import { ErrorCode } from '../../error-handler/error-code';
 import { ErrorException } from '../../error-handler/error-exception';
 import CollectionModel, { ICollection } from '../../models/db/collection.db';
+import ItemModel from '../../models/db/item.db';
 import TopicModel, { ITopic } from '../../models/db/topic.db';
 import UserModel, { IUser } from '../../models/db/user.db';
 import { STATUS_CODES } from '../../types/status';
@@ -212,6 +213,51 @@ export default {
       const topicTitles = topics.map(topic => topic.title);
 
       res.send(topicTitles);
+    } catch (e) {
+      return next(new ErrorException(ErrorCode.UnknownError, { e }));
+    }
+  },
+  getFiveBiggestCollections: async (
+    req: Request,
+    res: Response<GetUserCollectionsResponseType>,
+    next: NextFunction,
+  ) => {
+    const COLLECTIONS_COUNT = 5;
+
+    try {
+      const collectionsDb = await CollectionModel.find({})
+        .populate<{
+          topics: ITopic[];
+        }>('topics')
+        .populate<{
+          owner: IUser;
+        }>('owner');
+      const collectionItemCount = await Promise.all(
+        collectionsDb.map(async ({ id }) => ({
+          id,
+          count: await (await ItemModel.find({ collections: id })).length,
+        })),
+      );
+
+      collectionItemCount.sort((a, b) => b.count - a.count);
+
+      const biggestCollectionsIds = collectionItemCount
+        .splice(0, COLLECTIONS_COUNT)
+        .map(colleciton => colleciton.id);
+
+      const fiveCollections: GetUserCollectionsResponseType = collectionsDb
+        .filter(({ id }) => biggestCollectionsIds.includes(id))
+        .map(({ id, description, image, owner, title, itemFields, topics }) => ({
+          id,
+          description,
+          image,
+          owner: { id: owner._id.toString(), name: owner.name },
+          title,
+          itemFields,
+          topics: topics.map(topic => topic.title),
+        }));
+
+      res.send(fiveCollections);
     } catch (e) {
       return next(new ErrorException(ErrorCode.UnknownError, { e }));
     }

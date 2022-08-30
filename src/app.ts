@@ -61,16 +61,18 @@ app.post('/collections', authMiddleware(), COLLECTION.createCollection);
 app.patch('/collections/:id', authMiddleware(), COLLECTION.updateCollection);
 app.delete('/collections/:id', authMiddleware(), COLLECTION.deleteCollection);
 app.get('/collections/user/:id', COLLECTION.getUserCollections);
+app.get('/five', COLLECTION.getFiveBiggestCollections);
 
-app.get('/topics', authMiddleware(), COLLECTION.getTopics);
+app.get('/topics', COLLECTION.getTopics);
 
-app.get('/tags', authMiddleware(), TAGS.getTags);
+app.get('/tags', TAGS.getTags);
 
 app.get('/items/:id', authMiddleware(), ITEM.getItem);
 app.post('/items', authMiddleware(), ITEM.createItem);
 app.patch('/items/:id', authMiddleware(), ITEM.updateItem);
 app.delete('/items', authMiddleware(), ITEM.deleteItems);
 app.get('/items/collection/:id', authMiddleware(), ITEM.getCollectionItems);
+app.get('/items', ITEM.getTenLatestItems);
 
 app.get('/comments/:id', COMMENT.getComments);
 app.post('/comments', authMiddleware(), COMMENT.createComment);

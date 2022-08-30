@@ -9,7 +9,7 @@ const CONNECTING = 2;
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 let mongooseConnection: Connection | null = null;
 
-export async function connect(): Promise<void> {
+export async function connect(): Promise<Connection | null> {
   try {
     mongoose.connection.on('connecting', () => {
       console.log(`MongoDB: connecting.`);
@@ -38,4 +38,6 @@ export async function connect(): Promise<void> {
   } catch (error) {
     console.log(`Error connecting to DB`, error);
   }
+
+  return mongooseConnection;
 }

@@ -13,6 +13,7 @@ import {
   DeleteItemsRequestType,
   GetCollectionItemsRequestQueryType,
   GetCollectionItemsResponseType,
+  GetTenLatestResponse,
   ItemType,
   UpdateItemRequestBodyType,
 } from './types';
@@ -118,18 +119,17 @@ export default {
         itemFields,
       };
 
-      await ItemModel.create(newItem);
-      const createdItemExists = await ItemModel.findOne({
-        _id: itemObjectId,
-      }).populate<{ tags: ITag[] }>('tags');
+      const createdItemDb = await (
+        await ItemModel.create(newItem)
+      ).populate<{ tags: ITag[] }>('tags');
 
-      if (!createdItemExists) return next(new ErrorException(ErrorCode.UnknownError));
+      if (!createdItemDb) return next(new ErrorException(ErrorCode.UnknownError));
       const createdItem: CreateItemResponseType = {
-        id: createdItemExists._id.toString(),
-        title: createdItemExists.title,
-        collection: createdItemExists.collections._id.toString(),
-        itemFields: createdItemExists.itemFields,
-        tags: createdItemExists.tags.map(tag => tag.title),
+        id: createdItemDb._id.toString(),
+        title: createdItemDb.title,
+        collection: createdItemDb.collections._id.toString(),
+        itemFields: createdItemDb.itemFields,
+        tags: createdItemDb.tags.map(tag => tag.title),
       };
 
       res.send(createdItem);
@@ -193,6 +193,35 @@ export default {
     try {
       await ItemModel.deleteMany({ _id: { $in: req.body.itemIds } });
       res.send({ deleted: req.body.itemIds });
+    } catch (e) {
+      return next(new ErrorException(ErrorCode.UnknownError, { e }));
+    }
+  },
+  getTenLatestItems: async (
+    req: Request,
+    res: Response<GetTenLatestResponse>,
+    next: NextFunction,
+  ) => {
+    try {
+      const itemsLimit = 10;
+      const latestItemsDb = await ItemModel.find({})
+        .sort({ createdAt: -1 })
+        .limit(itemsLimit)
+        .populate<{ collections: ICollection }>({
+          path: 'collections',
+          populate: { path: 'owner' },
+        });
+
+      const latestItemsRes: GetTenLatestResponse = latestItemsDb.map(
+        ({ id, title, collections: { _id: colId, image, title: colTitle, owner } }) => ({
+          item: { id, title },
+          collection: { id: colId.toString(), image, title: colTitle },
+          // @ts-ignore
+          owner: { id: owner._id.toString(), title: owner.name },
+        }),
+      );
+
+      res.send(latestItemsRes);
     } catch (e) {
       return next(new ErrorException(ErrorCode.UnknownError, { e }));
     }
