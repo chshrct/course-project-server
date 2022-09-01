@@ -29,6 +29,11 @@ const IItemSchema = new Schema<IItem>(
   { collection: 'items', timestamps: true },
 );
 
+// IItemSchema.index(
+//   { title: 'text', 'itemFields.value': 'text' },
+//   { default_language: 'none' },
+// );
+
 const ItemModel: Model<IItem> = model('Item', IItemSchema);
 
 export default ItemModel;

@@ -35,6 +35,11 @@ const ICollectionSchema = new Schema<ICollection>(
   { collection: 'collections', timestamps: true },
 );
 
+// ICollectionSchema.index(
+//   { title: 'text', description: 'text' },
+//   { default_language: 'none' },
+// );
+
 const CollectionModel: Model<ICollection> = model('Collection', ICollectionSchema);
 
 export default CollectionModel;

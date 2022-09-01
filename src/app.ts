@@ -12,6 +12,7 @@ import COMMENT from './endpoints/comment';
 import { CommentResponseType } from './endpoints/comment/types';
 import ITEM from './endpoints/item';
 import LIKE from './endpoints/like';
+import SEARCH from './endpoints/search';
 import TAGS from './endpoints/tags';
 import USER from './endpoints/user';
 import { errorHandler } from './error-handler/error-handler';
@@ -56,7 +57,7 @@ app.get('/users/:id', USER.getUserName);
 app.delete('/users', authMiddleware(true), USER.deleteUsers);
 app.put('/users', authMiddleware(true), USER.updateUsers);
 
-app.get('/collections/:id', authMiddleware(), COLLECTION.getCollection);
+app.get('/collections/:id', COLLECTION.getCollection);
 app.post('/collections', authMiddleware(), COLLECTION.createCollection);
 app.patch('/collections/:id', authMiddleware(), COLLECTION.updateCollection);
 app.delete('/collections/:id', authMiddleware(), COLLECTION.deleteCollection);
@@ -67,19 +68,21 @@ app.get('/topics', COLLECTION.getTopics);
 
 app.get('/tags', TAGS.getTags);
 
-app.get('/items/:id', authMiddleware(), ITEM.getItem);
+app.get('/items/:id', ITEM.getItem);
 app.post('/items', authMiddleware(), ITEM.createItem);
 app.patch('/items/:id', authMiddleware(), ITEM.updateItem);
 app.delete('/items', authMiddleware(), ITEM.deleteItems);
-app.get('/items/collection/:id', authMiddleware(), ITEM.getCollectionItems);
+app.get('/items/collection/:id', ITEM.getCollectionItems);
 app.get('/items', ITEM.getTenLatestItems);
 
 app.get('/comments/:id', COMMENT.getComments);
 app.post('/comments', authMiddleware(), COMMENT.createComment);
 
 app.get('/likes/:id', LIKE.getItemLikes);
-app.post('/likes', LIKE.createLike);
-app.delete('/likes', LIKE.deleteLike);
+app.post('/likes', authMiddleware(), LIKE.createLike);
+app.delete('/likes', authMiddleware(), LIKE.deleteLike);
+
+app.get('/search', SEARCH.searchByQuery);
 
 app.use(errorHandler);
 
