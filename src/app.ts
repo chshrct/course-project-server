@@ -74,6 +74,7 @@ app.patch('/items/:id', authMiddleware(), ITEM.updateItem);
 app.delete('/items', authMiddleware(), ITEM.deleteItems);
 app.get('/items/collection/:id', ITEM.getCollectionItems);
 app.get('/items', ITEM.getTenLatestItems);
+app.get('/items/bytag/:tag', ITEM.getItemsByTag);
 
 app.get('/comments/:id', COMMENT.getComments);
 app.post('/comments', authMiddleware(), COMMENT.createComment);

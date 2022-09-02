@@ -13,6 +13,7 @@ import {
   DeleteItemsRequestType,
   GetCollectionItemsRequestQueryType,
   GetCollectionItemsResponseType,
+  GetItemsByTagResponse,
   GetTenLatestResponse,
   ItemType,
   UpdateItemRequestBodyType,
@@ -192,6 +193,9 @@ export default {
   ) => {
     try {
       await ItemModel.deleteMany({ _id: { $in: req.body.itemIds } });
+
+      // await CommentModel.deleteOne({ item: doc._id });
+      // await LikeModel.deleteOne({ item: doc._id });
       res.send({ deleted: req.body.itemIds });
     } catch (e) {
       return next(new ErrorException(ErrorCode.UnknownError, { e }));
@@ -222,6 +226,50 @@ export default {
       );
 
       res.send(latestItemsRes);
+    } catch (e) {
+      return next(new ErrorException(ErrorCode.UnknownError, { e }));
+    }
+  },
+  getItemsByTag: async (
+    req: Request<{ tag: string }, {}, {}, GetCollectionItemsRequestQueryType>,
+    res: Response<GetItemsByTagResponse>,
+    next: NextFunction,
+  ) => {
+    try {
+      const { tag } = req.params;
+      const { limit = DEFAULT_PAGE_LIMIT, page = 1 } = req.query;
+
+      const pageNum = Number(page);
+      const limitNum = Number(limit);
+      const tagDb = await TagModel.findOne({ title: tag });
+
+      if (!tagDb) return next(new ErrorException(ErrorCode.NotFound));
+
+      const itemsDb = await ItemModel.find({ tags: tagDb._id })
+        .limit(limitNum * pageNum)
+        .populate<{ collections: ICollection }>({
+          path: 'collections',
+          populate: { path: 'owner' },
+        })
+        .exec();
+
+      const count = await ItemModel.countDocuments({ tags: tagDb._id });
+
+      const itemsRes: GetTenLatestResponse = itemsDb.map(
+        ({ id, title, collections: { _id: colId, image, title: colTitle, owner } }) => ({
+          item: { id, title },
+          collection: { id: colId.toString(), image, title: colTitle },
+          // @ts-ignore
+          owner: { id: owner._id.toString(), title: owner.name },
+        }),
+      );
+
+      const response = {
+        items: itemsRes,
+        count,
+      };
+
+      res.send(response);
     } catch (e) {
       return next(new ErrorException(ErrorCode.UnknownError, { e }));
     }

@@ -1,5 +1,6 @@
 import mongoose, { model, Model, Schema } from 'mongoose';
 
+import CollectionModel from './collection.db';
 import { UserAccessType, UserStatusType } from './types';
 
 export interface IUser {
@@ -27,6 +28,19 @@ const IUserSchema = new Schema<IUser>(
   },
   { collection: 'users', timestamps: true },
 );
+
+IUserSchema.pre('deleteMany', async function cb(next) {
+  // @ts-ignore
+  const deletedUserIdsArray = this._conditions._id.$in;
+  const deletedCollectionsIdsArray = (
+    await CollectionModel.find({
+      owner: { $in: deletedUserIdsArray },
+    })
+  ).map(collection => collection.id);
+
+  await CollectionModel.deleteMany({ _id: { $in: deletedCollectionsIdsArray } });
+  next();
+});
 
 const UserModel: Model<IUser> = model('User', IUserSchema);
 

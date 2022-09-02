@@ -38,3 +38,12 @@ export type GetTenLatestResponse = {
   collection: { id: string; title: string; image: string | null };
   owner: { id: string; title: string };
 }[];
+
+export type GetItemsByTagResponse = {
+  items: {
+    item: { id: string; title: string };
+    collection: { id: string; title: string; image: string | null };
+    owner: { id: string; title: string };
+  }[];
+  count: number;
+};

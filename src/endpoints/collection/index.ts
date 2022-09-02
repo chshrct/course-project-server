@@ -196,7 +196,7 @@ export default {
     try {
       const { id } = req.params;
 
-      await CollectionModel.deleteOne({ _id: id });
+      await CollectionModel.deleteMany({ _id: { $in: [id] } });
 
       res.status(STATUS_CODES.OK).end();
     } catch (e) {
