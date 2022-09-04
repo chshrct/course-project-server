@@ -10,6 +10,7 @@ export type SignUpRequestBodyType = {
 export type SignInRequestBodyType = {
   email: string;
   password: string;
+  googleData?: { name: string };
 };
 
 export type SignInResponseBodyType = {
@@ -27,4 +28,8 @@ export type AuthCheckResponseBodyType = {
   id: string;
   name: string;
   access: UserAccessType;
+};
+
+export type GithubSignInRequestType = {
+  code: string;
 };

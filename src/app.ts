@@ -51,7 +51,7 @@ app.get('/', (req: Request, res: Response) => {
 app.get('/auth/check', authMiddleware(), AUTH.check);
 app.post('/auth/sign-up', AUTH.signUp);
 app.post('/auth/sign-in', AUTH.signIn);
-
+app.post('/auth/github', AUTH.githubSignIn);
 app.get('/users', authMiddleware(true), USER.getUsers);
 app.get('/users/:id', USER.getUserName);
 app.delete('/users', authMiddleware(true), USER.deleteUsers);

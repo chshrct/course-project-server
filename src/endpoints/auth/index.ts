@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { NextFunction, Request, Response } from 'express';
 import mongoose from 'mongoose';
 
@@ -11,6 +12,7 @@ import { STATUS_CODES } from '../../types/status';
 import {
   AuthCheckResponseBodyType,
   AuthMiddlewareBodyType,
+  GithubSignInRequestType,
   SignInRequestBodyType,
   SignInResponseBodyType,
   SignUpRequestBodyType,
@@ -72,12 +74,26 @@ export default {
     res: Response<SignInResponseBodyType>,
     next: NextFunction,
   ) => {
-    const { email, password } = req.body;
+    const { email, password, googleData } = req.body;
 
-    const userExists = await UserModel.findOne({ email });
+    let userExists = await UserModel.findOne({ email });
 
     if (!userExists) {
-      return next(new ErrorException(ErrorCode.Unauthenticated));
+      if (googleData) {
+        const { name } = googleData;
+        const hashedPassword = passwordHash(password);
+
+        userExists = await UserModel.create({
+          _id: new mongoose.Types.ObjectId(),
+          email,
+          name,
+          password: hashedPassword,
+          access: 'basic',
+          status: 'active',
+        });
+      } else {
+        return next(new ErrorException(ErrorCode.Unauthenticated));
+      }
     }
     if (userExists.status === 'blocked') {
       return next(new ErrorException(ErrorCode.Blocked));
@@ -97,5 +113,69 @@ export default {
       access: userExists.access,
       token,
     });
+  },
+  githubSignIn: async (
+    req: Request<{}, {}, GithubSignInRequestType>,
+    res: Response<SignInResponseBodyType>,
+    next: NextFunction,
+  ) => {
+    try {
+      const { code } = req.body;
+
+      const gitAccessTokenData = await axios.post(
+        `https://github.com/login/oauth/access_token?client_id=${process.env.GITHUB_CLIENT_ID}&client_secret=${process.env.GITHUB_SECRET}&code=${code}`,
+        {},
+        {
+          headers: {
+            Accept: 'application/json',
+          },
+        },
+      );
+
+      const {
+        data: { email, node_id: password, name },
+      } = await axios.get(`https://api.github.com/user`, {
+        headers: {
+          Authorization: `Bearer ${gitAccessTokenData.data.access_token}`,
+          Accept: 'application/json',
+        },
+      });
+
+      let userExists = await UserModel.findOne({ email });
+
+      if (!userExists) {
+        const hashedPassword = passwordHash(password);
+
+        userExists = await UserModel.create({
+          _id: new mongoose.Types.ObjectId(),
+          email,
+          name,
+          password: hashedPassword,
+          access: 'basic',
+          status: 'active',
+        });
+      }
+
+      if (userExists.status === 'blocked') {
+        return next(new ErrorException(ErrorCode.Blocked));
+      }
+
+      const validPassword = comparePassword(password, userExists.password);
+
+      if (!validPassword) {
+        return next(new ErrorException(ErrorCode.Unauthenticated));
+      }
+
+      const token = generateAuthToken(userExists);
+
+      res.send({
+        id: userExists._id.toString(),
+        name: userExists.name,
+        access: userExists.access,
+        token,
+      });
+    } catch (e) {
+      return next(new ErrorException(ErrorCode.UnknownError, { e }));
+    }
   },
 };
